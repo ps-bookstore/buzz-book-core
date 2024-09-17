@@ -30,23 +30,12 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
-      - name: Cache SonarQube packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
       - name: Cache Maven packages
         uses: actions/cache@v1
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Build and analyze
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=be6-aa-core -Dsonar.projectName='be6-aa-core'
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -54,12 +43,12 @@ jobs:
       - name: login
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
         env:
-          IMAGE_NAME: heldenar/book-core-api
+          IMAGE_NAME: parkseol/book-core-api
           TAG: latest
         run: |
           docker build -t $IMAGE_NAME:$TAG .
@@ -77,8 +66,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            docker pull heldenar/book-core-api:latest
+            docker pull parkseol/book-core-api:latest
             docker stop core_api || true
             docker rm core_api || true
-            docker run -d --name core_api --network api_network  -p 8090:8090 heldenar/book-core-api:latest
+            docker run -d --name core_api --network api_network  -p 8090:8090 parkseol/book-core-api:latest
 
