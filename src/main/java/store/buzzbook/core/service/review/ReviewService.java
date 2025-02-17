@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -68,7 +69,8 @@ public class ReviewService {
 		}
 
 		// 리뷰저장
-		String url = (imageFiles == null || imageFiles.isEmpty()) ? null : buildPathString(imageClient.multiImageUpload(imageFiles));
+		String url = (imageFiles == null || imageFiles.isEmpty()) ? null : buildPathString(
+			Objects.requireNonNull(imageClient.uploadImages(imageFiles).getBody()));
 		Review review = new Review(reviewReq.getContent(), url, reviewReq.getReviewScore(), orderDetail);
 		reviewRepository.save(review);
 
