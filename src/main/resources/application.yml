@@ -5,9 +5,6 @@ spring:
   application:
     name: core-api
 
-  profiles:
-    default: dev
-
   jpa:
     generate-ddl: false
     hibernate:
