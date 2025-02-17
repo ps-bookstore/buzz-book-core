@@ -49,13 +49,13 @@ api:
 eureka:
   instance:
     instance-id: core-api
-    hostname: eureka-server
+    hostname: localhost
     prefer-ip-address: true
   client:
     fetch-registry: true
     register-with-eureka: true
     service-url:
-      defaultZone: http://admin:1234@eureka-server:8761/eureka
+      defaultZone: http://admin:1234@localhost:8761/eureka
 
 cloud:
   aws:
