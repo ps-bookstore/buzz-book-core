@@ -20,6 +20,10 @@ public class ImageService {
 
 	public ResponseEntity<List<String>> uploadImages(List<MultipartFile> files) {
 		try {
+			if (files == null || files.isEmpty()) {
+				return ResponseEntity.badRequest().body(List.of());
+			}
+
 			List<String> uploadedUrls = files.stream().map(file -> {
 				try {
 					return uploadFileToS3(file);
@@ -30,7 +34,7 @@ public class ImageService {
 
 			return ResponseEntity.ok(uploadedUrls);
 		} catch (Exception e) {
-			return ResponseEntity.status(500).body(null);
+			return ResponseEntity.internalServerError().body(List.of());
 		}
 	}
 
