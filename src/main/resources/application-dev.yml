@@ -29,7 +29,7 @@ spring:
 api:
   gateway:
     host: localhost
-    port: 8080
+    port: 8000
 
 eureka:
   instance:
