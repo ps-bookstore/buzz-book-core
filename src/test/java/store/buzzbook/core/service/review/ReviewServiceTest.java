@@ -104,7 +104,7 @@ class ReviewServiceTest {
 		when(orderDetailRepository.findById(orderDetailId)).thenReturn(Optional.of(orderDetail));
 		when(orderDetail.getId()).thenReturn(orderDetailId);
 		when(reviewRepository.existsByOrderDetailId(orderDetailId)).thenReturn(false);
-		when(imageClient.multiImageUpload(imageFiles)).thenReturn(List.of("path1", "path2"));
+		when(imageClient.uploadImages(imageFiles).getBody()).thenReturn(List.of("path1", "path2"));
 		when(pointPolicyRepository.findByName(anyString())).thenReturn(pp);
 
 		ReviewResponse response = reviewService.saveReview(reviewRequest, imageFiles);
