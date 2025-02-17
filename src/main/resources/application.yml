@@ -8,9 +8,6 @@ spring:
   profiles:
     default: dev
 
-  config:
-    import: application-secret.yml
-
   jpa:
     generate-ddl: false
     hibernate:
