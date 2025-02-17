@@ -42,15 +42,5 @@ eureka:
     service-url:
       defaultZone: http://admin:1234@localhost:8761/eureka
 
-nhncloud:
-  keymanager:
-    appkey: 2SxwmBzUfnqJaA2A
-    mysql:
-      url: cacea6422cee4017b8af5edd24834165
-      username: 6764281f095b4154ab34a04b4fea6b8d
-      password: 3a23273e707b438e94f104f47ce7a7ba
-  image:
-    appkey: vyiy4M85i8mJ5mgP
-    secretkey: fBlt6m4cSRJs07X05mhPBfmofWoBlcSU
 
 

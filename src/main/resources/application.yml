@@ -1,5 +1,5 @@
 server:
-  port: 8090
+  port: 7090
 
 spring:
   application:
@@ -8,6 +8,8 @@ spring:
   profiles:
     default: dev
 
+  config:
+    import: application-secret.yml
 
   jpa:
     generate-ddl: false
@@ -32,17 +34,6 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
-  rabbitmq:
-    host: 133.186.241.167
-    port: 5672
-    username: admin
-    password: nhnacademy123!
-
-  elasticsearch:
-    uris: http://115.94.72.197:9200
-    username: elastic
-    password: nhnacademy123!
-
   cloud:
     openfeign:
       enabled: true
@@ -56,7 +47,7 @@ spring:
 
 aladin:
   api:
-    key: ttbheej19982032001
+    key: ttbpspsps221838001
 
 
 springdoc:
@@ -101,20 +92,6 @@ management:
   info:
     env:
       enabled: true
-
-logncrash:
-  config:
-    file-path: logs
-    file-name: core-api-log
-  app-key: Xyx7DoyszcG66ULx
-  url: https://api-logncrash.cloud.toast.com
-  version: 1.0.0
-  host: aa-core-api
-  platform: aa-core-api
-  log:
-    version: v2
-    source: aa
-    type: aa
 
 feign:
   client:

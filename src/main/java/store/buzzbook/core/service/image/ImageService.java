@@ -1,80 +1,46 @@
 package store.buzzbook.core.service.image;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import lombok.RequiredArgsConstructor;
 
-import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.RequiredArgsConstructor;
-import store.buzzbook.core.client.image.CloudImageClient;
-
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class ImageService {
 
-	private static final String REVIEW_FOLDER_PATH = "/aa-image/review";
+	private final AmazonS3 amazonS3;
+	private final String bucketName = "ps-store-bucket";
 
-	private final CloudImageClient cloudImageClient;
-	private final ObjectMapper objectMapper;
-
-	@Value("${nhncloud.image.secretkey}")
-	private String secretKey;
-
-	public String uploadImagesToCloud(List<MultipartFile> files, String folderPath) {
-		boolean overwrite = true;
-
-		Map<String, Object> paramsMap = Map.of(
-			"basepath", folderPath,
-			"overwrite", overwrite
-		);
-
-		String paramsJson = null;
-
+	public ResponseEntity<List<String>> uploadImages(List<MultipartFile> files) {
 		try {
-			paramsJson = new ObjectMapper().writeValueAsString(paramsMap);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
+			List<String> uploadedUrls = files.stream().map(file -> {
+				try {
+					return uploadFileToS3(file);
+				} catch (IOException e) {
+					throw new RuntimeException("Failed to upload file: " + file.getOriginalFilename(), e);
+				}
+			}).collect(Collectors.toList());
+
+			return ResponseEntity.ok(uploadedUrls);
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body(null);
 		}
-
-		ResponseEntity<JSONObject> response = cloudImageClient.uploadImages(secretKey, paramsJson, files);
-
-		return Objects.requireNonNull(response.getBody()).toJSONString();
-
 	}
 
-	public List<String> multiImageUpload(List<MultipartFile> files) {
+	private String uploadFileToS3(MultipartFile file) throws IOException {
+		String key = "images/" + file.getOriginalFilename();
+		ObjectMetadata metadata = new ObjectMetadata();
+		metadata.setContentLength(file.getSize());
+		metadata.setContentType(file.getContentType());
 
-		Map<String, Object> paramsMap = Map.of(
-			"basepath", REVIEW_FOLDER_PATH,
-			"overwrite", false,
-			"autorename", true
-		);
-		try {
-			String paramsJson = new ObjectMapper().writeValueAsString(paramsMap);
-			ResponseEntity<JSONObject> response = cloudImageClient.uploadImages(secretKey, paramsJson, files);
-
-
-			JsonNode successesNode = objectMapper.readTree(Objects.requireNonNull(response.getBody()).toString()).get("successes");
-			List<String> imageUrls = new ArrayList<>();
-			if (successesNode != null && successesNode.isArray()) {
-				for (JsonNode success : successesNode) {
-					String imageUrl = success.get("url").asText();
-					imageUrls.add(imageUrl);
-				}
-			}
-			return imageUrls;
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
+		amazonS3.putObject(bucketName, key, file.getInputStream(), metadata);
+		return amazonS3.getUrl(bucketName, key).toString();
 	}
 }
