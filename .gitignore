@@ -40,5 +40,3 @@ core.log
 *.log
 core.log
 
-/application-secret.yml
-application-secret.yml
