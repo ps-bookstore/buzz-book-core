@@ -58,7 +58,8 @@ public class ProductController {
 		@RequestParam(required = false, defaultValue = "1") @Parameter(description = "페이지 번호") Integer pageNo,
 		@RequestParam(required = false, defaultValue = "10") @Parameter(description = "한 페이지에 보여질 아이템 수") Integer pageSize) {
 
-		Page<ProductResponse> products = productService.getProductsByCriteria(status, name,elasticName, categoryId, orderBy, pageNo, pageSize);
+		//고침
+		Page<ProductResponse> products = productService.getProductsByCriteria(status, name, categoryId, orderBy, pageNo, pageSize);
 		return ResponseEntity.ok(products);
 	}
 

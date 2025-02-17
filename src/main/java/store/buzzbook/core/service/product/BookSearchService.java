@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,11 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import store.buzzbook.core.elastic.document.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import store.buzzbook.core.dto.product.BookApiRequest;
-import store.buzzbook.core.elastic.repository.BookDocumentRepository;
 import store.buzzbook.core.entity.product.Author;
 import store.buzzbook.core.entity.product.Book;
 import store.buzzbook.core.entity.product.BookAuthor;
@@ -46,7 +43,6 @@ public class BookSearchService {
 	private final ProductRepository productRepository;
 	private final BookAuthorRepository bookAuthorRepository;
 	private final CategoryRepository categoryRepository;
-	private final BookDocumentRepository bookDocumentRepository;
 	@Value("${aladin.api.key}")
 	private String aladinApiKey;
 
@@ -146,8 +142,6 @@ public class BookSearchService {
 				book.setProduct(product);
 				bookRepository.save(book);
 
-				indexBookToElasticsearch(book);
-
 				// 저자 저장 및 도서별 저자 저장
 				for (String authorName : item.getAuthor().split(",")) {
 					Author author = authorRepository.findByName(authorName.trim());
@@ -166,24 +160,6 @@ public class BookSearchService {
 			} catch (Exception e) {
 				log.error("'도서' 저장 중 오류 발생: {}", item.getTitle(), e);
 			}
-		}
-	}
-
-	public void indexBookToElasticsearch(Book book) {
-		try {
-			// BookDocument 생성 및 저장
-			BookDocument bookDocument = new BookDocument(
-				book.getId(),
-				book.getProduct().getId(),
-				book.getIsbn(),
-				book.getTitle(),
-				book.getDescription(),
-				book.getProduct().getForwardDate(),
-				book.getBookAuthors().stream().map(bookAuthor -> bookAuthor.getAuthor().getName()).collect(Collectors.toList())
-			);
-			bookDocumentRepository.save(bookDocument);
-		} catch (Exception e) {
-			log.error("Elasticsearch 인덱싱 오류: {}", book.getTitle(), e);
 		}
 	}
 }

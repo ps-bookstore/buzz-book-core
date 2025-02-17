@@ -26,7 +26,6 @@ import store.buzzbook.core.dto.product.ProductRequest;
 import store.buzzbook.core.dto.product.ProductResponse;
 import store.buzzbook.core.dto.product.ProductUpdateRequest;
 import store.buzzbook.core.dto.product.TagResponse;
-import store.buzzbook.core.elastic.client.ElasticSearchClient;
 import store.buzzbook.core.entity.product.Category;
 import store.buzzbook.core.entity.product.Product;
 import store.buzzbook.core.entity.product.ProductTag;
@@ -45,7 +44,6 @@ public class ProductService {
 	private final TagRepository tagRepository;
 	private final ProductTagRepository productTagRepository;
 	private final ProductSpecification productSpecification;
-	private final ElasticSearchClient elasticSearchClient;
 
 	private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	private final ObjectMapper objectMapper;
@@ -167,46 +165,20 @@ public class ProductService {
 		return "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
 	}
 
-	//엘라스틱으로 받아온 값을 objectMapper로 변환해서 book json에서 product id값만 list로 가져오기
 	@Transactional(readOnly = true)
-	public Page<ProductResponse> getProductsByCriteria(Product.StockStatus status, String name, String elasticName,
-		Integer categoryId, String orderBy, int pageNo, int pageSize) {
-		List<Integer> productIds = new ArrayList<>();
-
+	public Page<ProductResponse> getProductsByCriteria(Product.StockStatus status, String name, Integer categoryId,
+		String orderBy, int pageNo, int pageSize) {
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
-		if (elasticName != null) {
-			String authHeader = createAuthToken();
-
-			String searchResult = elasticSearchClient.searchProducts(elasticName, authHeader, pageNo, 1000);
-
-			try {
-				JsonNode rootNode = objectMapper.readTree(searchResult);
-				JsonNode hitsNode = rootNode.path("hits").path("hits");
-
-				for (JsonNode hitNode : hitsNode) {
-					JsonNode sourceNode = hitNode.path("_source");
-					Integer productId = sourceNode.path("productId").asInt();
-					productIds.add(productId);
-				}
-
-				// 추출한 productId로 제품 데이터 조회
-				// Page<Product> products = productRepository.findByIdIn(productIds, pageable);
-
-			} catch (JsonProcessingException e) {
-				e.getStackTrace();
-				return Page.empty(pageable);
-			}
-		}
 
 		Page<Product> products;
+
 		if ("reviews".equals(orderBy)) {
 			products = productRepository.findProductsByCriteriaOrderByReviewCountDesc(status, name, categoryId,
 				pageable);
 		} else {
-
 			Specification<Product> spec = Specification.where(
-					productSpecification.getProductsByCriteria(status, name, categoryId, productIds)
-				.and(productSpecification.orderBy(orderBy)));
+					productSpecification.getProductsByCriteria(status, name, categoryId))
+				.and(productSpecification.orderBy(orderBy));
 			products = productRepository.findAll(spec, pageable);
 		}
 
