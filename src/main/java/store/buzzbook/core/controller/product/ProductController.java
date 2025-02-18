@@ -52,7 +52,6 @@ public class ProductController {
 	public ResponseEntity<Page<ProductResponse>> getAllProduct(
 		@RequestParam(required = false) Product.StockStatus status,
 		@RequestParam(required = false) String name,
-		@RequestParam(required = false) String elasticName,
 		@RequestParam(required = false) Integer categoryId,
 		@RequestParam(required = false) @Parameter(description = "name, score, reviews") String orderBy,
 		@RequestParam(required = false, defaultValue = "1") @Parameter(description = "페이지 번호") Integer pageNo,

@@ -43,7 +43,7 @@ spring:
 
 api:
   gateway:
-    host: buzz-book.shop
+    host: localhost
     port: 8000
 
 eureka:
