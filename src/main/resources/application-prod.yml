@@ -40,6 +40,7 @@ spring:
     database: mysql
     database-platform: org.hibernate.dialect.MySQL8Dialect
     open-in-view: false
+    show-sql: false
 
 api:
   gateway:
@@ -66,3 +67,9 @@ cloud:
       static: ap-northeast-2
     stack:
       auto: false
+logging:
+  level:
+    org:
+      hibernate:
+        sql: off
+
