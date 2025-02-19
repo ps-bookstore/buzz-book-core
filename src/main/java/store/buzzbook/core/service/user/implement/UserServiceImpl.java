@@ -133,6 +133,7 @@ public class UserServiceImpl implements UserService {
 			.build();
 
 		gradeLogRepository.save(gradeLog);
+		gradeLogRepository.flush();
 
 		PointPolicy pointPolicy = pointPolicyRepository.findByName(SIGN_UP);
 		PointLog pointLog = PointLog.builder()
